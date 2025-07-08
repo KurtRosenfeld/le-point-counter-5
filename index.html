@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point Counter Ultimate</title>
+    <style>
+        :root {
+            --sunday-purple: #68187F;
+            --fire-red: #ff4d4d;
+            --fire-yellow: #f9cb28;
+            --goal-red: #e74c3c;
+            --blue-primary: #3498db;
+            --blue-dark: #2980b9;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1800px;
+        }
+
+        .left-panel, .center-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        /* GOAL & COUNTER SECTION */
+        .goal-section {
+            grid-column: 1 / -1;
+            margin-bottom: -10px;
+        }
+        
+        .goal-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--goal-red);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--goal-red);
+            text-align: center;
+        }
+
+        .counter-display {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 20px 40px;
+            border-radius: 10px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--blue-primary), var(--goal-red));
+            text-align: center;
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .point-button {
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .point-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .small-point {
+            background-color: var(--blue-primary);
+            color: white;
+        }
+
+        .medium-point {
+            background-color: var(--blue-dark);
+            color: white;
+        }
+
+        .large-point {
+            background-color: var(--goal-red);
+            color: white;
+        }
+
+        .fire-point {
+            background: linear-gradient(to right, var(--fire-red), var(--fire-yellow));
+            color: white;
+            font-weight: bold;
+            animation: fireGlow 1.5s infinite alternate;
+        }
+
+        .sunday-point {
+            background-color: var(--sunday-purple);
+            color: white;
+        }
+
+        @keyframes fireGlow {
+            from { box-shadow: 0 0 5px var(--fire-red); }
+            to { box-shadow: 0 0 15px var(--fire-yellow); }
+        }
+
+        .reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* LEFT PANEL - MILESTONES & MONTHS */
+        .achievement-list, .monthly-list, 
+        .leaderboard-list, .weekly-goals {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .achievement-item, .monthly-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+        }
+
+        .achievement-date {
+            color: var(--sunday-purple);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        /* RIGHT PANEL - NOTES & WEEKLY GOALS */
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: none;
+        }
+
+        .weekly-goal-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .weekly-goal-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .weekly-results {
+            font-weight: bold;
+            color: var(--sunday-purple);
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .goal-section {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .counter-display {
+                font-size: 3.5rem;
+                padding: 15px 30px;
+            }
+            
+            .point-button {
+                padding: 8px 15px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- TOP GOAL (FULL WIDTH) -->
+        <div class="panel-section goal-section">
+            <input type="text" class="goal-input" id="goalInput" placeholder="ENTER YOUR TOP GOAL (e.g., 'Reach 50,000 points by New Year's')">
+        </div>
+
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+            <div class="panel-section">
+                <h2>Milestone Achievements</h2>
+                <div class="achievement-list" id="achievementList"></div>
+            </div>
+            
+            <div class="panel-section">
+                <h2>Monthly Progress</h2>
+                <div class="monthly-list" id="monthlyList"></div>
+            </div>
+            
+            <div class="panel-section">
+                <h2>Top 5 Months</h2>
+                <div class="leaderboard-list" id="leaderboardList"></div>
+            </div>
+        </div>
+
+        <!-- CENTER PANEL -->
+        <div class="center-panel">
+            <div class="panel-section" style="text-align: center;">
+                <div class="counter-display" id="counter">0</div>
+                
+                <div class="buttons-container">
+                    <button class="point-button small-point" onclick="addPoints(10)">+10</button>
+                    <button class="point-button small-point" onclick="addPoints(20)">+20</button>
+                    <button class="point-button medium-point" onclick="addPoints(50)">+50</button>
+                    <button class="point-button medium-point" onclick="addPoints(100)">+100</button>
+                    <button class="point-button large-point" onclick="addPoints(150)">+150</button>
+                    <button class="point-button large-point" onclick="addPoints(200)">+200</button>
+                    <button class="point-button large-point" onclick="addPoints(500)">+500</button>
+                    <button class="point-button sunday-point" id="sundayButton" onclick="addPoints(750)" disabled title="Available Sundays only">Sunday +750</button>
+                    <button class="point-button fire-point" onclick="addFirePoints()">+1000</button>
+                </div>
+                
+                <button class="reset-button" onclick="resetCounter()">Reset Counter</button>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <h2>Notes</h2>
+                <textarea id="notes" placeholder="Your notes here..."></textarea>
+            </div>
+            
+            <div class="panel-section">
+                <h2>Weekly Goals</h2>
+                <div class="weekly-goals" id="weeklyGoals">
+                    <div class="weekly-goal-item">
+                        <input type="checkbox" id="goal1-check">
+                        <input type="text" class="weekly-goal-input" id="goal1-text" placeholder="Goal 1">
+                    </div>
+                    <div class="weekly-goal-item">
+                        <input type="checkbox" id="goal2-check">
+                        <input type="text" class="weekly-goal-input" id="goal2-text" placeholder="Goal 2">
+                    </div>
+                    <div class="weekly-goal-item">
+                        <input type="checkbox" id="goal3-check">
+                        <input type="text" class="weekly-goal-input" id="goal3-text" placeholder="Goal 3">
+                    </div>
+                    <div class="weekly-goal-item">
+                        <input type="checkbox" id="goal4-check">
+                        <input type="text" class="weekly-goal-input" id="goal4-text" placeholder="Goal 4">
+                    </div>
+                    <div class="weekly-goal-item">
+                        <input type="checkbox" id="goal5-check">
+                        <input type="text" class="weekly-goal-input" id="goal5-text" placeholder="Goal 5">
+                    </div>
+                </div>
+                <div class="weekly-results" id="weeklyResults"></div>
+                <button class="point-button" style="width: 100%; margin-top: 10px;" onclick="evaluateWeeklyGoals()">Evaluate Week</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Core Variables
+        let points = 0;
+        let currentMonthPoints = 0;
+        let currentMonth = '';
+        let currentWeek = '';
+        
+        // DOM Elements
+        const counterEl = document.getElementById('counter');
+        const notesEl = document.getElementById('notes');
+        const goalEl = document.getElementById('goalInput');
+        const sundayButton = document.getElementById('sundayButton');
+        const achievementList = document.getElementById('achievementList');
+        const monthlyList = document.getElementById('monthlyList');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const weeklyResultsEl = document.getElementById('weeklyResults');
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            checkSunday();
+            setupTimeTracking();
+            
+            // Regular checks
+            setInterval(checkSunday, 3600000);
+            setInterval(checkTimeChange, 3600000);
+        });
+
+        // ======================
+        // DATA MANAGEMENT
+        // ======================
+        function loadData() {
+            // Points
+            points = parseInt(localStorage.getItem('pointCounter')) || 0;
+            currentMonthPoints = parseInt(localStorage.getItem('currentMonthPoints')) || 0;
+            currentMonth = localStorage.getItem('currentMonth') || '';
+            currentWeek = localStorage.getItem('currentWeek') || '';
+            
+            // UI Elements
+            notesEl.value = localStorage.getItem('pointCounterNotes') || '';
+            goalEl.value = localStorage.getItem('pointCounterGoal') || '';
+            achievementList.innerHTML = localStorage.getItem('pointCounterAchievements') || '';
+            monthlyList.innerHTML = localStorage.getItem('pointCounterMonthly') || '';
+            leaderboardList.innerHTML = localStorage.getItem('pointCounterLeaderboard') || '';
+            
+            // Weekly Goals
+            for (let i = 1; i <= 5; i++) {
+                const text = localStorage.getItem(`weeklyGoal${i}`);
+                const checked = localStorage.getItem(`weeklyGoal${i}-checked`) === 'true';
+                if (text) document.getElementById(`goal${i}-text`).value = text;
+                document.getElementById(`goal${i}-check`).checked = checked;
+            }
+            
+            updateCounter();
+        }
+
+        function saveData() {
+            // Points
+            localStorage.setItem('pointCounter', points);
+            localStorage.setItem('currentMonthPoints', currentMonthPoints);
+            localStorage.setItem('currentMonth', currentMonth);
+            localStorage.setItem('currentWeek', currentWeek);
+            
+            // UI Elements
+            localStorage.setItem('pointCounterNotes', notesEl.value);
+            localStorage.setItem('pointCounterGoal', goalEl.value);
+            localStorage.setItem('pointCounterAchievements', achievementList.innerHTML);
+            localStorage.setItem('pointCounterMonthly', monthlyList.innerHTML);
+            localStorage.setItem('pointCounterLeaderboard', leaderboardList.innerHTML);
+            
+            // Weekly Goals
+            for (let i = 1; i <= 5; i++) {
+                const text = document.getElementById(`goal${i}-text`).value;
+                const checked = document.getElementById(`goal${i}-check`).checked;
+                localStorage.setItem(`weeklyGoal${i}`, text);
+                localStorage.setItem(`weeklyGoal${i}-checked`, checked);
+            }
+        }
+
+        // ======================
+        // TIME TRACKING
+        // ======================
+        function setupTimeTracking() {
+            const now = new Date();
+            const monthYear = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
+            const weekYear = `Week ${getWeekNumber(now)}, ${now.getFullYear()}`;
+            
+            if (!currentMonth || currentMonth !== monthYear) {
+                if (currentMonth && currentMonthPoints > 0) {
+                    saveMonthlyData(currentMonth, currentMonthPoints);
+                    updateLeaderboard();
+                }
+                currentMonth = monthYear;
+                currentMonthPoints = 0;
+            }
+            
+            if (!currentWeek || currentWeek !== weekYear) {
+                currentWeek = weekYear;
+            }
+            
+            saveData();
+        }
+
+        function checkTimeChange() {
+            const now = new Date();
+            const monthYear = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
+            const weekYear = `Week ${getWeekNumber(now)}, ${now.getFullYear()}`;
+            
+            // Month change
+            if (currentMonth !== monthYear) {
+                if (currentMonthPoints > 0) {
+                    saveMonthlyData(currentMonth, currentMonthPoints);
+                    updateLeaderboard();
+                }
+                currentMonth = monthYear;
+                currentMonthPoints = 0;
+            }
+            
+            // Week change
+            if (currentWeek !== weekYear) {
+                currentWeek = weekYear;
+                evaluateWeeklyGoals(true);
+            }
+            
+            saveData();
+        }
+
+        function getWeekNumber(date) {
+            const firstDay = new Date(date.getFullYear(), 0, 1);
+            const pastDays = (date - firstDay) / 86400000;
+            return Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
+        }
+
+        // ======================
+        // MONTHLY & LEADERBOARD
+        // ======================
+        function saveMonthlyData(month, points) {
+            const item = document.createElement('div');
+            item.className = 'monthly-item';
+            item.textContent = `${month}: ${points} Points`;
+            monthlyList.prepend(item);
+        }
+
+        function updateLeaderboard() {
+            const items = Array.from(monthlyList.children);
+            if (items.length === 0) return;
+            
+            const monthData = items.map(item => {
+                const match = item.textContent.match(/(.*): (\d+) Points/);
+                return { month: match[1], points: parseInt(match[2]) };
+            }).sort((a, b) => b.points - a.points).slice(0, 5);
+            
+            leaderboardList.innerHTML = monthData.map((data, i) => `
+                <div class="monthly-item">
+                    <span style="color: var(--goal-red); font-weight: bold;">${i + 1}.</span>
+                    ${data.month}
+                    <span style="float: right; font-weight: bold;">${data.points}</span>
+                </div>
+            `).join('');
+        }
+
+        // ======================
+        // WEEKLY GOALS
+        // ======================
+        function evaluateWeeklyGoals(silent = false) {
+            let completed = 0;
+            let totalSet = 0;
+            
+            for (let i = 1; i <= 5; i++) {
+                const text = document.getElementById(`goal${i}-text`).value;
+                const checked = document.getElementById(`goal${i}-check`).checked;
+                
+                if (text) {
+                    totalSet++;
+                    if (checked) completed++;
+                    // Reset checkboxes for new week
+                    if (silent) document.getElementById(`goal${i}-check`).checked = false;
+                }
+            }
+            
+            if (totalSet > 0) {
+                const messages = [
+                    "Keep trying!",
+                    "Good start!",
+                    "Halfway there!",
+                    "Almost perfect!",
+                    "Amazing week!",
+                    "PERFECT WEEK!"
+                ];
+                
+                const resultText = `This week: ${completed}/${totalSet} - ${messages[completed]}`;
+                weeklyResultsEl.textContent = resultText;
+                
+                if (!silent) {
+                    alert(resultText);
+                }
+            } else {
+                weeklyResultsEl.textContent = "No goals set for this week";
+            }
+            
+            saveData();
+        }
+
+        // ======================
+        // CORE FUNCTIONALITY
+        // ======================
+        function addPoints(value) {
+            points += value;
+            currentMonthPoints += value;
+            updateCounter();
+        }
+
+        function addFirePoints() {
+            const achievement = prompt("What did you do to earn 1000 points?");
+            if (achievement) {
+                const date = new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                const item = document.createElement('div');
+                item.className = 'achievement-item';
+                item.innerHTML = `
+                    <span class="achievement-date">${date}</span>
+                    ${achievement}
+                `;
+                achievementList.prepend(item);
+                
+                addPoints(1000);
+            }
+        }
+
+        function resetCounter() {
+            if (confirm("Reset ALL points and progress?")) {
+                points = 0;
+                currentMonthPoints = 0;
+                updateCounter();
+            }
+        }
+
+        function checkSunday() {
+            const isSunday = new Date().getDay() === 0;
+            sundayButton.disabled = !isSunday;
+            sundayButton.title = isSunday 
+                ? "Happy Sunday! Bonus points available!" 
+                : "Available Sundays only";
+        }
+
+        function updateCounter() {
+            counterEl.textContent = points;
+            
+            // Animation
+            counterEl.style.transform = 'scale(1.1)';
+            setTimeout(() => counterEl.style.transform = 'scale(1)', 200);
+            
+            // Color by digit count
+            const digits = points.toString().length;
+            const colors = [
+                'linear-gradient(135deg, var(--blue-primary), var(--goal-red))',
+                'linear-gradient(135deg, var(--goal-red), #f39c12)',
+                'linear-gradient(135deg, #f39c12, #2ecc71)',
+                'linear-gradient(135deg, #2ecc71, #9b59b6)',
+                'linear-gradient(135deg, #9b59b6, #1abc9c)',
+                'linear-gradient(135deg, #1abc9c, #d35400)'
+            ];
+            counterEl.style.background = colors[Math.min(digits - 1, 5)] || colors[0];
+            
+            saveData();
+        }
+
+        // Auto-save listeners
+        notesEl.addEventListener('input', saveData);
+        goalEl.addEventListener('input', saveData);
+        document.querySelectorAll('.weekly-goal-input').forEach(el => {
+            el.addEventListener('input', saveData);
+        });
+        document.querySelectorAll('[id$="-check"]').forEach(el => {
+            el.addEventListener('change', saveData);
+        });
+    </script>
+</body>
+</html>
